@@ -5,11 +5,25 @@ const path = require('path');
 const User = require('./js/login-schema')
 const bcrypt = require('bcrypt')
 const saltRounds = 10;
+const session = require('express-session');
+
 
 
 
 // Middleware
 app.use(express.json());
+app.set('view engine', 'ejs');
+
+// Set up session handling
+app.use(session({
+    secret: 'secret_key',
+    resave: false,
+    saveUninitialized: true
+}));
+
+// Serve static files
+app.use(express.static('public'));
+
 
 // Use the built-in middleware to parse URL-encoded bodies
 app.use(express.urlencoded({ extended: true }));
@@ -32,16 +46,14 @@ app.get('/node_modules/hijrah-date/hijrah-date.js', (req, res) => {
 
 // login/register pages
 app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, "./pages", "login.html"));
+    res.sendFile(path.join(__dirname, "./views", "login.html"));
 });
 
 app.get('/register', (req,res) => {
-    res.sendFile(path.join(__dirname, "./pages", "register.html"));
+    res.sendFile(path.join(__dirname, "./views", "register.html"));
 })
 
-app.get('/home', (req, res) => {
-    res.sendFile(path.join(__dirname, "./pages", "customHome.html"));
-})
+
 
 app.post('/register', async (req, res) => {
     const { username, password } = req.body;
@@ -83,10 +95,10 @@ app.post('/login', (req, res) => {
                 if (err) throw err;
     
                 if (result === true) {
-                    module.exports = { username }
+                    req.session.user = username
                     res.redirect('/home')
                 } else {
-                    res.send('Invalid username or password ❌');
+                    res.status(400).send('Invalid username or password ❌');
                 }
             });
         }
@@ -96,8 +108,23 @@ app.post('/login', (req, res) => {
 
 });
 
+app.get('/home', (req, res) => {
+    if (req.session.user) {
+        res.render('customHome', { username: req.session.user });  // Pass username to EJS template
+    }
+})
 
 
+
+app.post('/logout', (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Failed to log out');
+        }
+        res.redirect('/'); // Redirect to the home page after logout
+    });
+});
 
 
 

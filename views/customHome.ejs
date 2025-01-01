@@ -7,6 +7,7 @@
         <script src="../index.js"></script>
         <title>Life X Deen.</title>
         <link type="text/css" href="css/home.css" rel="stylesheet">
+        <link type="text/css" href="css/custom.css" rel="stylesheet">
     </head>
     <body>
         <h1>Life X Deen</h1>
@@ -28,9 +29,9 @@
             setInterval(getDate, 1000)
             
         </script>
-        <span id="theUser", class = "theUser"></span>
-        <script class="personalPage">
-            document.querySelector('#theUser').textContent = "Logged in as: "
-        </script>
+        <h4>Logged in as: <%= username %></h4>
+        <form action="/logout" method="POST">
+            <button type="submit">Logout</button>
+        </form>
     </body>
 </html>
